@@ -9,8 +9,8 @@ class SingletonModelAdmin(admin.ModelAdmin):
     change_form_template = "admin/singleton_models/change_form.html"
     
     def has_add_permission(self, request):
-        """ Singleton pattern: prevent addition of new objects """
-        return False
+        """ Singleton pattern: prevent addition of new objects (but allow first one) """
+        return self.model.objects.count() < 1
         
     def get_urls(self):
         from django.conf.urls.defaults import patterns, url
@@ -22,7 +22,8 @@ class SingletonModelAdmin(admin.ModelAdmin):
 
         info = self.model._meta.app_label, self.model._meta.module_name
 
-        urlpatterns = patterns('',
+        urlpatterns = super(SingletonModelAdmin, self).get_urls()
+        urlpatterns += patterns('',
             url(r'^history/$',
                 wrap(self.history_view),
                 {'object_id': '1'},
