@@ -13,8 +13,13 @@ class SingletonModelAdmin(admin.ModelAdmin):
         return self.model.objects.count() < 1
         
     def get_urls(self):
-        from django.conf.urls.defaults import patterns, url
-
+        try:
+            # Prevent deprecation warnings on Django >= 1.4
+            from django.conf.urls import patterns, url
+        except ImportError:
+            # For compatibility with Django <= 1.3
+            from django.conf.urls.defaults import patterns, url
+        
         def wrap(view):
             def wrapper(*args, **kwargs):
                 return self.admin_site.admin_view(view)(*args, **kwargs)
