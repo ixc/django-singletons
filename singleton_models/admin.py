@@ -2,6 +2,7 @@ from django.contrib import admin
 from django.utils.translation import ugettext as _
 from django.utils.encoding import force_unicode
 from django.http import HttpResponseRedirect
+from functools import update_wrapper
 
 class SingletonModelAdmin(admin.ModelAdmin):
 
@@ -12,7 +13,7 @@ class SingletonModelAdmin(admin.ModelAdmin):
         return False
         
     def get_urls(self):
-        from django.conf.urls.defaults import patterns, url
+        from django.conf.urls import patterns, url
 
         def wrap(view):
             def wrapper(*args, **kwargs):
