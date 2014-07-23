@@ -1,7 +1,9 @@
+from django.core.urlresolvers import reverse_lazy
 from django.contrib import admin
 from django.utils.translation import ugettext as _
 from django.utils.encoding import force_unicode
 from django.http import HttpResponseRedirect
+from django.views.generic import RedirectView
 from functools import update_wrapper
 
 class SingletonModelAdmin(admin.ModelAdmin):
@@ -10,6 +12,10 @@ class SingletonModelAdmin(admin.ModelAdmin):
     
     def has_add_permission(self, request):
         """ Singleton pattern: prevent addition of new objects """
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        """ Singleton pattern: prevent deletion of object """
         return False
         
     def get_urls(self):
@@ -23,11 +29,14 @@ class SingletonModelAdmin(admin.ModelAdmin):
         info = self.model._meta.app_label, self.model._meta.module_name
 
         urlpatterns = patterns('',
+            url(r'^/$',
+                RedirectView.as_view(url=reverse_lazy('admin:%s_%s_change' % info)),
+                name='%s_%s_changelist' % info),
             url(r'^history/$',
                 wrap(self.history_view),
                 {'object_id': '1'},
                 name='%s_%s_history' % info),
-            url(r'^$',
+            url(r'^1/$',
                 wrap(self.change_view),
                 {'object_id': '1'},
                 name='%s_%s_change' % info),
