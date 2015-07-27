@@ -1,8 +1,12 @@
 from functools import update_wrapper
+
+from django.core.urlresolvers import reverse_lazy
 from django.contrib import admin
+from django.http import HttpResponseRedirect
 from django.utils.translation import ugettext as _
 from django.utils.encoding import force_unicode
-from django.http import HttpResponseRedirect
+from django.views.generic import RedirectView
+
 
 class SingletonModelAdmin(admin.ModelAdmin):
 
@@ -11,6 +15,10 @@ class SingletonModelAdmin(admin.ModelAdmin):
     def has_add_permission(self, request):
         """ Singleton pattern: prevent addition of new objects (but allow first one) """
         return self.model.objects.count() < 1
+
+    def has_delete_permission(self, request, obj=None):
+        """ Singleton pattern: prevent deletion of object """
+        return False
         
     def get_urls(self):
         try:
@@ -19,7 +27,7 @@ class SingletonModelAdmin(admin.ModelAdmin):
         except ImportError:
             # For compatibility with Django <= 1.3
             from django.conf.urls.defaults import patterns, url
-        
+
         def wrap(view):
             def wrapper(*args, **kwargs):
                 return self.admin_site.admin_view(view)(*args, **kwargs)
@@ -29,7 +37,14 @@ class SingletonModelAdmin(admin.ModelAdmin):
 
         urlpatterns = super(SingletonModelAdmin, self).get_urls()
         urlpatterns = patterns('',
-            url(r'^$',
+            url(r'^/$',
+                RedirectView.as_view(url=reverse_lazy('admin:%s_%s_change' % info)),
+                name='%s_%s_changelist' % info),
+            url(r'^history/$',
+                wrap(self.history_view),
+                {'object_id': '1'},
+                name='%s_%s_history' % info),
+            url(r'^1/$',
                 wrap(self.change_view),
                 {'object_id': '1'},
                 name='%s_%s_changelist' % info),
