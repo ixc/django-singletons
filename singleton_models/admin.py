@@ -38,8 +38,11 @@ class SingletonModelAdmin(admin.ModelAdmin):
                 return self.admin_site.admin_view(view)(*args, **kwargs)
             return update_wrapper(wrapper, view)
         
-        # Django <= 1.6 uses "module_name"; Django >= 1.7 uses "model_name" 
-        model_name = getattr(self.model._meta, 'model_name', self.model._meta.module_name)
+        # Django <= 1.6 uses "module_name"; Django >= 1.7 uses "model_name"
+        try:
+            model_name = self.model._meta.model_name
+        except AttributeError:
+            model_name = self.model._meta.mofule_name
         info = self.model._meta.app_label, model_name
 
         urlpatterns = super(SingletonModelAdmin, self).get_urls()
