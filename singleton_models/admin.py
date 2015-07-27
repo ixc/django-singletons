@@ -3,8 +3,13 @@ from functools import update_wrapper
 from django.core.urlresolvers import reverse_lazy
 from django.contrib import admin
 from django.http import HttpResponseRedirect
+try:
+    # Enables Python 3 compatibility with Django >= 1.5
+    from django.utils.encoding import force_text
+except ImportError:
+    # For compatibility with Django <= 1.4
+    from django.utils.encoding import force_unicode as force_text
 from django.utils.translation import ugettext as _
-from django.utils.encoding import force_unicode
 from django.views.generic import RedirectView
 
 
@@ -59,7 +64,7 @@ class SingletonModelAdmin(admin.ModelAdmin):
         """
         opts = obj._meta
 
-        msg = _('%(obj)s was changed successfully.') % {'obj': force_unicode(obj)}
+        msg = _('%(obj)s was changed successfully.') % {'obj': force_text(obj)}
         if request.POST.has_key("_continue"):
             self.message_user(request, msg + ' ' + _("You may edit it again below."))
             return HttpResponseRedirect(request.path)
