@@ -18,6 +18,7 @@ Example Usage
 
 in models.py
 
+(Note that this step is optional in most cases, and may even conflict with integrating publishing and/or reversion functionality into your model. Using the SingletonModelAdmin in your admin.py, as described further below should be sufficient in most scenarios.)
 
 from singleton_models.models import SingletonModel
 
