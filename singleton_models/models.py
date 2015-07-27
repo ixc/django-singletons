@@ -6,4 +6,10 @@ class SingletonModel(models.Model):
         abstract = True
             
     def save(self, *args, **kwargs):
+        self.id=1
         super(SingletonModel, self).save(*args, **kwargs)
+
+    def delete(self, *args, **kwargs):
+        pass
+
+        
