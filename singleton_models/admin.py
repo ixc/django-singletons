@@ -42,7 +42,7 @@ class SingletonModelAdmin(admin.ModelAdmin):
         try:
             model_name = self.model._meta.model_name
         except AttributeError:
-            model_name = self.model._meta.mofule_name
+            model_name = self.model._meta.module_name
         info = self.model._meta.app_label, model_name
 
         urlpatterns = super(SingletonModelAdmin, self).get_urls()
