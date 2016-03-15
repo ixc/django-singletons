@@ -1,2 +1,4 @@
 *.pyc
+/.eggs/
+/dist/
 django_singletons.egg-info
