@@ -69,11 +69,22 @@ class SingletonModelAdmin(admin.ModelAdmin):
 
         msg = _('%(obj)s was changed successfully.') % {'obj': force_text(obj)}
         if request.POST.has_key("_continue"):
-            self.message_user(request, msg + ' ' + _("You may edit it again below."))
-            return HttpResponseRedirect(request.path)
+            self.message_user(
+                request,
+                msg + ' ' + _("You may edit it again below.")
+                messages.SUCCESS
+            )
+            redirect_url = request.path
+            redirect_url = add_preserved_filters({
+                    'preserved_filters': self.get_preserved_filters(request),
+                    'opts': self.model._meta
+                }, redirect_url)
+            return HttpResponseRedirect(redirect_url)
         else:
-            self.message_user(request, msg)
-            return HttpResponseRedirect("../../")
+            self.message_user(request, msg, messages.SUCCESS)
+            return HttpResponseRedirect(
+                reverse('admin:index', current_app=self.admin_site.name)
+            )
             
     def change_view(self, request, object_id, extra_context=None):
         if object_id=='1':
