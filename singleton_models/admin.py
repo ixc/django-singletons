@@ -16,7 +16,7 @@ from django.views.generic import RedirectView
 class SingletonModelAdmin(admin.ModelAdmin):
 
     change_form_template = "admin/singleton_models/change_form.html"
-    
+
     def has_add_permission(self, request):
         """ Singleton pattern: prevent addition of new objects (but allow first one) """
         return self.model.objects.count() < 1
@@ -24,7 +24,7 @@ class SingletonModelAdmin(admin.ModelAdmin):
     def has_delete_permission(self, request, obj=None):
         """ Singleton pattern: prevent deletion of object """
         return False
-        
+
     def get_urls(self):
         try:
             # Prevent deprecation warnings on Django >= 1.4
@@ -37,7 +37,7 @@ class SingletonModelAdmin(admin.ModelAdmin):
             def wrapper(*args, **kwargs):
                 return self.admin_site.admin_view(view)(*args, **kwargs)
             return update_wrapper(wrapper, view)
-        
+
         # Django <= 1.6 uses "module_name"; Django >= 1.7 uses "model_name"
         try:
             model_name = self.model._meta.model_name
@@ -60,7 +60,7 @@ class SingletonModelAdmin(admin.ModelAdmin):
                 name='%s_%s_changelist' % info),
         ) + urlpatterns
         return urlpatterns
-        
+
     def response_change(self, request, obj):
         """
         Determines the HttpResponse for the change_view stage.
@@ -71,7 +71,7 @@ class SingletonModelAdmin(admin.ModelAdmin):
         if request.POST.has_key("_continue"):
             self.message_user(
                 request,
-                msg + ' ' + _("You may edit it again below.")
+                msg + ' ' + _("You may edit it again below."),
                 messages.SUCCESS
             )
             redirect_url = request.path
@@ -85,7 +85,7 @@ class SingletonModelAdmin(admin.ModelAdmin):
             return HttpResponseRedirect(
                 reverse('admin:index', current_app=self.admin_site.name)
             )
-            
+
     def change_view(self, request, object_id, extra_context=None):
         if object_id=='1':
             self.model.objects.get_or_create(pk=1)
