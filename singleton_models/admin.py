@@ -1,8 +1,9 @@
+from functools import update_wrapper
+
 from django.contrib import admin
 from django.utils.translation import ugettext as _
 from django.utils.encoding import force_unicode
 from django.http import HttpResponseRedirect
-from django.utils.functional import update_wrapper
 
 class SingletonModelAdmin(admin.ModelAdmin):
 
@@ -14,27 +15,28 @@ class SingletonModelAdmin(admin.ModelAdmin):
         
     def get_urls(self):
         try:
-            # Prevent deprecation warnings on Django >= 1.4
-            from django.conf.urls import patterns, url
+            from django.conf.urls import url  # >= 1.4
         except ImportError:
-            # For compatibility with Django <= 1.3
-            from django.conf.urls.defaults import patterns, url
-        
+            from django.conf.urls.defaults import url
+
         def wrap(view):
             def wrapper(*args, **kwargs):
                 return self.admin_site.admin_view(view)(*args, **kwargs)
             return update_wrapper(wrapper, view)
 
-        info = self.model._meta.app_label, self.model._meta.module_name
+        try:
+            info = self.model._meta.app_label, self.model._meta.model_name  # >= 1.6
+        except AttributeError:
+            info = self.model._meta.app_label, self.model._meta.module_name
 
         urlpatterns = super(SingletonModelAdmin, self).get_urls()
-        urlpatterns = patterns('',
+        urlpatterns = [
             url(r'^$',
                 wrap(self.change_view),
                 {'object_id': '1'},
                 name='%s_%s_changelist' % info),
-        ) + urlpatterns
-        
+        ] + urlpatterns
+
         return urlpatterns
         
     def response_change(self, request, obj):
