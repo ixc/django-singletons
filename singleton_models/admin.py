@@ -27,26 +27,22 @@ class SingletonModelAdmin(admin.ModelAdmin):
 
     def get_urls(self):
         try:
-            # Prevent deprecation warnings on Django >= 1.4
-            from django.conf.urls import patterns, url
+            from django.conf.urls import url  # >= 1.4
         except ImportError:
-            # For compatibility with Django <= 1.3
-            from django.conf.urls.defaults import patterns, url
+            from django.conf.urls.defaults import url
 
         def wrap(view):
             def wrapper(*args, **kwargs):
                 return self.admin_site.admin_view(view)(*args, **kwargs)
             return update_wrapper(wrapper, view)
 
-        # Django <= 1.6 uses "module_name"; Django >= 1.7 uses "model_name"
         try:
-            model_name = self.model._meta.model_name
+            info = self.model._meta.app_label, self.model._meta.model_name  # >= 1.6
         except AttributeError:
-            model_name = self.model._meta.module_name
-        info = self.model._meta.app_label, model_name
+            info = self.model._meta.app_label, self.model._meta.module_name
 
         urlpatterns = super(SingletonModelAdmin, self).get_urls()
-        urlpatterns = patterns('',
+        urlpatterns = [
             url(r'^/$',
                 RedirectView.as_view(url=reverse_lazy('admin:%s_%s_change' % info)),
                 name='%s_%s_changelist' % info),
@@ -58,7 +54,8 @@ class SingletonModelAdmin(admin.ModelAdmin):
                 wrap(self.change_view),
                 {'object_id': '1'},
                 name='%s_%s_changelist' % info),
-        ) + urlpatterns
+        ] + urlpatterns
+
         return urlpatterns
 
     def response_change(self, request, obj):
