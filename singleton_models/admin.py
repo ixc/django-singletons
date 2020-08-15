@@ -1,7 +1,7 @@
 from functools import update_wrapper
 
 from django.contrib import messages
-from django.contrib.admin.templatetags.admin_tags import add_preserved_filters
+from django.contrib.admin.templatetags.admin_urls import add_preserved_filters
 from django.core.urlresolvers import reverse, reverse_lazy
 from django.contrib import admin
 from django.http import HttpResponseRedirect
